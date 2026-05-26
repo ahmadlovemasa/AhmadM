@@ -1,16 +1,19 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
-export const runtime = 'edge'; 
+export const runtime = 'edge';
 
 export async function POST(req) {
-  try {
-    const { prompt } = await req.json();
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const { prompt } = await req.json();
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return Response.json({ summary: response.text() });
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "gpt-4o-mini",
+    });
+    return Response.json({ summary: completion.choices[0].message.content });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
