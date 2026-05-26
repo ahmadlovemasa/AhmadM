@@ -1,9 +1,9 @@
 export const runtime = 'edge';
 
 export async function POST(req) {
-  const { prompt } = await req.json();
-
   try {
+    const { text } = await req.json(); // نكتفي باستقبال النص فقط للتجربة
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -12,16 +12,19 @@ export async function POST(req) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }]
+        messages: [{ role: "user", content: text || "مرحباً" }]
       }),
     });
 
     const data = await response.json();
     
-    if (!response.ok) throw new Error(data.error?.message || "فشل الاتصال");
+    // إذا كان هناك خطأ من OpenAI، سنظهره بوضوح
+    if (data.error) {
+      return Response.json({ error: data.error.message }, { status: 500 });
+    }
 
     return Response.json({ summary: data.choices[0].message.content });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: "خطأ غير متوقع: " + error.message }, { status: 500 });
   }
 }
