@@ -647,7 +647,7 @@ function Home() {
                                     color: "#10b981",
                                     fontWeight: "bold"
                                 },
-                                children: "Ahmad"
+                                children: "AM Notebook"
                             }, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
                                 lineNumber: 243,
