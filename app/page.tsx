@@ -97,7 +97,7 @@ export default function Home() {
       
       <header style={styles.header}>
         <div style={styles.logo}>
-          Ahmad<span style={{ color: "#10b981" }}>AI</span>
+          AM<span style={{ color: "#10b981" }}>Notebook</span>
         </div>
         <div style={styles.badge}>● تحليل الصور والسلايدات مفعّل 📸</div>
       </header>
