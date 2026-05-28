@@ -20,16 +20,18 @@ export async function POST(req) {
     const data = await response.json();
     const summary = data.choices[0].message.content;
 
-    // 2. الحل الأكيد: تحميل مكتبة supabase ديناميكياً
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-    // 3. الحفظ في قاعدة البيانات
-    const { error } = await supabase.from('summaries').insert([
-      { original_text: text, summary_result: summary }
-    ]);
-
-    if (error) throw new Error(error.message);
+    // 2. استخدام الاتصال المباشر (REST API) بدون الاعتماد على أي مكتبات خارجية
+    // هذا الكود لا يتطلب وجود supabase-js في الـ package.json، لذا سيتخطى خطأ الـ Build
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/summaries`, {
+      method: 'POST',
+      headers: {
+        'apikey': process.env.SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ original_text: text, summary_result: summary })
+    });
 
     return NextResponse.json({ summary });
   } catch (error) {
