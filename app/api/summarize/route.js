@@ -1,13 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 export async function POST(req) {
   try {
     const { text } = await req.json();
 
-    // 1. طلب التلخيص من OpenAI
+    // 1. التلخيص من OpenAI
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -23,15 +20,16 @@ export async function POST(req) {
     const data = await response.json();
     const summary = data.choices[0].message.content;
 
-    // 2. الحفظ في Supabase (هنا اللحظة الحاسمة)
+    // 2. الحل الأكيد: تحميل مكتبة supabase ديناميكياً
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+    // 3. الحفظ في قاعدة البيانات
     const { error } = await supabase.from('summaries').insert([
       { original_text: text, summary_result: summary }
     ]);
 
-    if (error) {
-      console.error("Supabase Error:", error);
-      return NextResponse.json({ error: "فشل الحفظ: " + error.message }, { status: 500 });
-    }
+    if (error) throw new Error(error.message);
 
     return NextResponse.json({ summary });
   } catch (error) {
